@@ -37,8 +37,8 @@ Button {
             anchors.fill: img
             source: img
             cached: true
-            color: (control.down || control.hovered) ? control.colorHoverd:
-                       (control.active? control.color: control.colorInactive)
+            color: (control.down || control.hovered) ? control.colorHoverd :
+                       (control.active ? control.color : control.colorInactive)
 
         }
     }

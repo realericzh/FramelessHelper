@@ -8,15 +8,12 @@
 #include <QScreen>
 #include <QEvent>
 #include <QtWin>
-
 #include <QOperatingSystemVersion>
 
 #include "NativeWindowFilter.h"
 
 #if defined(__GNUC__)
-//我电脑上的mingw报错，说没定义，那咋就给它定义一个
-//make mingw happy
-#define WM_DPICHANGED       0x02E0
+#  define WM_DPICHANGED       0x02E0
 #endif
 
 // class NativeWindowHelper
@@ -37,7 +34,6 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
 
     if (d->window) {
         d->scaleFactor = d->window->screen()->devicePixelRatio();
-
         if (d->window->flags() & Qt::FramelessWindowHint) {
             d->window->installEventFilter(this);
             d->updateWindowStyle();
@@ -54,11 +50,11 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window)
     Q_D(NativeWindowHelper);
 
     Q_CHECK_PTR(window);
+
     d->window = window;
 
     if (d->window) {
         d->scaleFactor = d->window->screen()->devicePixelRatio();
-
         if (d->window->flags() & Qt::FramelessWindowHint) {
             d->window->installEventFilter(this);
             d->updateWindowStyle();
@@ -76,31 +72,31 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
 
     Q_CHECK_PTR(d->window);
 
-    LPMSG lpMsg = reinterpret_cast<LPMSG>(msg);
-    WPARAM wParam = lpMsg->wParam;
-    LPARAM lParam = lpMsg->lParam;
+    const LPMSG lpMsg = reinterpret_cast<LPMSG>(msg);
+    const WPARAM wParam = lpMsg->wParam;
+    const LPARAM lParam = lpMsg->lParam;
 
     if (WM_NCHITTEST == lpMsg->message) {
-        *result = d->hitTest(GET_X_LPARAM(lParam),
-                             GET_Y_LPARAM(lParam));
+        *result = d->hitTest(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return true;
     } else if (WM_NCACTIVATE == lpMsg->message) {
-        if (!QtWin::isCompositionEnabled()) {
-            if (result) *result = 1;
-            return true;
-        }
+        if (result) *result = 1;
+        return true;
     } else if (WM_NCCALCSIZE == lpMsg->message) {
         if (TRUE == wParam) {
-            if (d->isMaximized()) {
-                NCCALCSIZE_PARAMS &params = *reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
+            if (HWND hWnd = reinterpret_cast<HWND>(d->window->winId())) {
+                WINDOWPLACEMENT placement = {0};
+                if (GetWindowPlacement(hWnd, &placement) && (SW_MAXIMIZE == placement.showCmd)) {
+                    LPNCCALCSIZE_PARAMS params = reinterpret_cast<LPNCCALCSIZE_PARAMS>(lParam);
 
-                QRect g = d->availableGeometry();
-                QMargins m = d->maximizedMargins();
+                    const QRect g = d->availableGeometry();
+                    const QMargins mm = d->maximizedMargins();
 
-                params.rgrc[0].top = g.top() - m.top();
-                params.rgrc[0].left = g.left() - m.left();
-                params.rgrc[0].right = g.right() + m.right() + 1;
-                params.rgrc[0].bottom = g.bottom() + m.bottom() + 1;
+                    params->rgrc[0].top =    g.top()    - mm.top();
+                    params->rgrc[0].left =   g.left()   - mm.left();
+                    params->rgrc[0].right =  g.right()  + mm.right() + 1;
+                    params->rgrc[0].bottom = g.bottom() + mm.bottom() + 1;
+                }
             }
 
             if (result) *result = 0;
@@ -109,50 +105,65 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
     } else if (WM_GETMINMAXINFO == lpMsg->message) {
         LPMINMAXINFO lpMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
 
-        QRect g = d->availableGeometry();
-        QMargins m = d->maximizedMargins();
+        const QRect g = d->availableGeometry();
+        const QMargins mm = d->maximizedMargins();
 
-        lpMinMaxInfo->ptMaxPosition.x = - m.left();
-        lpMinMaxInfo->ptMaxPosition.y =  - m.top();
-        lpMinMaxInfo->ptMaxSize.x = g.right() - g.left() + 1 + m.left() + m.right();
-        lpMinMaxInfo->ptMaxSize.y = g.bottom() - g.top() + 1 + m.top() + m.bottom();
+        lpMinMaxInfo->ptMaxPosition.x = -mm.left();
+        lpMinMaxInfo->ptMaxPosition.y =  -mm.top();
+        lpMinMaxInfo->ptMaxSize.x = g.right() - g.left() + 1 + mm.left() + mm.right();
+        lpMinMaxInfo->ptMaxSize.y = g.bottom() - g.top() + 1 + mm.top() + mm.bottom();
 
-        lpMinMaxInfo->ptMinTrackSize.x = d->window->minimumWidth();
-        lpMinMaxInfo->ptMinTrackSize.y = d->window->minimumHeight();
-        lpMinMaxInfo->ptMaxTrackSize.x = d->window->maximumWidth();
-        lpMinMaxInfo->ptMaxTrackSize.y = d->window->maximumHeight();
+        lpMinMaxInfo->ptMinTrackSize.x = max(d->window->minimumWidth() * d->scaleFactor, GetSystemMetrics(SM_CXMINTRACK));
+        lpMinMaxInfo->ptMinTrackSize.y = max(d->window->minimumHeight() * d->scaleFactor, GetSystemMetrics(SM_CYMINTRACK));
+        lpMinMaxInfo->ptMaxTrackSize.x = min(d->window->maximumWidth() * d->scaleFactor, GetSystemMetrics(SM_CXMAXTRACK));
+        lpMinMaxInfo->ptMaxTrackSize.y = min(d->window->maximumHeight() * d->scaleFactor, GetSystemMetrics(SM_CYMAXTRACK));
 
         if (result) *result = 0;
         return true;
     } else if (WM_NCLBUTTONDBLCLK == lpMsg->message) {
-        auto minimumSize = d->window->minimumSize();
-        auto maximumSize = d->window->maximumSize();
+        QSize minimumSize = d->window->minimumSize();
+        QSize maximumSize = d->window->maximumSize();
         if ((minimumSize.width() >= maximumSize.width())
                 || (minimumSize.height() >= maximumSize.height())) {
             if (result) *result = 0;
             return true;
         }
     } else if (WM_DPICHANGED == lpMsg->message) {
-        qreal old = d->scaleFactor;
-        if (HIWORD(wParam) < 144) {
-            d->scaleFactor = 1.0;
+        qreal scaleFactor = HIWORD(wParam) < 144 ? 1.0 : 2.0;
+        if (scaleFactor != d->scaleFactor) {
+            d->scaleFactor = scaleFactor;
+            emit scaleFactorChanged(scaleFactor);
+        }
+
+        const LPRECT suggested = reinterpret_cast<LPRECT>(lParam);
+        if ((suggested->right - suggested->left) < 10) {
+            SetWindowPos(reinterpret_cast<HWND>(d->window->winId()),
+                         NULL,
+                         suggested->left,
+                         suggested->top,
+                         suggested->right - suggested->left + 1,
+                         suggested->bottom - suggested->top,
+                         SWP_NOZORDER | SWP_NOACTIVATE);
         } else {
-            d->scaleFactor = 2.0;
+            SetWindowPos(reinterpret_cast<HWND>(d->window->winId()),
+                         NULL,
+                         suggested->left,
+                         suggested->top,
+                         suggested->right - suggested->left - 1,
+                         suggested->bottom - suggested->top,
+                         SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
-        if (!qFuzzyCompare(old, d->scaleFactor)) {
-            emit scaleFactorChanged(d->scaleFactor);
-        }
-
-        auto hWnd = reinterpret_cast<HWND>(d->window->winId());
-        auto rect = reinterpret_cast<LPRECT>(lParam);
-        SetWindowPos(hWnd,
+        SetWindowPos(reinterpret_cast<HWND>(d->window->winId()),
                      NULL,
-                     rect->left,
-                     rect->top,
-                     rect->right - rect->left,
-                     rect->bottom - rect->top,
+                     suggested->left,
+                     suggested->top,
+                     suggested->right - suggested->left,
+                     suggested->bottom - suggested->top,
                      SWP_NOZORDER | SWP_NOACTIVATE);
+    } else if (WM_NCPAINT == lpMsg->message) {
+        if (result) *result = 0;
+        return true;
     }
 
     return false;
@@ -173,9 +184,7 @@ bool NativeWindowHelper::eventFilter(QObject *obj, QEvent *ev)
 
 qreal NativeWindowHelper::scaleFactor() const
 {
-    Q_D(const NativeWindowHelper);
-
-    return d->scaleFactor;
+    return d_func()->scaleFactor;
 }
 
 // class NativeWindowHelperPrivate
@@ -204,20 +213,21 @@ void NativeWindowHelperPrivate::updateWindowStyle()
     HWND hWnd = reinterpret_cast<HWND>(window->winId());
     if (NULL == hWnd)
         return;
-    else if (oldWindow == hWnd) {
+    else if (oldWindow == hWnd)
         return;
-    }
     oldWindow = hWnd;
 
     NativeWindowFilter::deliver(window, q);
 
-    QOperatingSystemVersion currentVersion = QOperatingSystemVersion::current();
-    if (currentVersion < QOperatingSystemVersion::Windows8) {
-        return;
+    if (window->inherits("QQuickWindow")) {
+        const QOperatingSystemVersion currentVersion = QOperatingSystemVersion::current();
+        if (currentVersion < QOperatingSystemVersion::Windows8) {
+            return;
+        }
     }
 
     LONG oldStyle = WS_OVERLAPPEDWINDOW | WS_THICKFRAME
-            | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;;
+            | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     LONG newStyle = WS_POPUP            | WS_THICKFRAME;
 
     if (QtWin::isCompositionEnabled())
@@ -234,10 +244,10 @@ void NativeWindowHelperPrivate::updateWindowStyle()
         newStyle |= WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
     }
 
-    LONG currentStyle = GetWindowLong(hWnd, GWL_STYLE);
+    const LONG currentStyle = GetWindowLong(hWnd, GWL_STYLE);
     SetWindowLong(hWnd, GWL_STYLE, (currentStyle & ~oldStyle) | newStyle);
 
-    SetWindowPos(hWnd, NULL, 0, 0, 0 , 0,
+    SetWindowPos(hWnd, NULL, 0, 0, 0, 0,
                  SWP_NOOWNERZORDER | SWP_NOZORDER |
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 
@@ -249,43 +259,32 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
-    x = x / window->devicePixelRatio();
-    y = y / window->devicePixelRatio();
-
     enum RegionMask {
-        Client = 0x0000,
-        Top    = 0x0001,
-        Left   = 0x0010,
-        Right  = 0x0100,
-        Bottom = 0x1000,
+        Client = 0x0,
+        Top    = 0x1,
+        Left   = 0x2,
+        Right  = 0x4,
+        Bottom = 0x8,
     };
 
-    auto wfg = window->frameGeometry();
-    QMargins draggableMargins
-            = this->draggableMargins();
+    const QMargins dm = draggableMargins();
 
-    int top = draggableMargins.top();
-    int left = draggableMargins.left();
-    int right = draggableMargins.right();
-    int bottom = draggableMargins.bottom();
+    const int top = dm.top() > 0       ? dm.top()    : GetSystemMetrics(SM_CYFRAME);
+    const int left = dm.left() > 0     ? dm.left()   : GetSystemMetrics(SM_CXFRAME);
+    const int right = dm.right() > 0   ? dm.right()  : GetSystemMetrics(SM_CXFRAME);
+    const int bottom = dm.bottom() > 0 ? dm.bottom() : GetSystemMetrics(SM_CYFRAME);
 
-    if (top <= 0)
-        top = GetSystemMetrics(SM_CYFRAME);
-    if (left <= 0)
-        left = GetSystemMetrics(SM_CXFRAME);
-    if (right <= 0)
-        right = GetSystemMetrics(SM_CXFRAME);
-    if (bottom <= 0)
-        bottom = GetSystemMetrics(SM_CYFRAME);
+    RECT windowRegion = {0};
+    HWND hWnd = reinterpret_cast<HWND>(window->winId());
+    GetWindowRect(hWnd, &windowRegion);
+    const int result =
+            (Top    * (y < (windowRegion.top    + top))) |
+            (Left   * (x < (windowRegion.left   + left))) |
+            (Right  * (x > (windowRegion.right  - right))) |
+            (Bottom * (y > (windowRegion.bottom - bottom)));
 
-    auto result =
-            (Top *    (y < (wfg.top() +    top))) |
-            (Left *   (x < (wfg.left() +   left))) |
-            (Right *  (x > (wfg.right() -  right))) |
-            (Bottom * (y > (wfg.bottom() - bottom)));
-
-    bool wResizable = window->minimumWidth() < window->maximumWidth();
-    bool hResizable = window->minimumHeight() < window->maximumHeight();
+    const bool wResizable = window->minimumWidth()  < window->maximumWidth();
+    const bool hResizable = window->minimumHeight() < window->maximumHeight();
 
     switch (result) {
     case Top | Left    : return wResizable && hResizable ? HTTOPLEFT     : HTCLIENT;
@@ -298,23 +297,15 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
-    auto pos = window->mapFromGlobal(QPoint(x, y));
-    return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
-}
+    if (tester) {
+        const int x2 = (x - windowRegion.left) / scaleFactor;
+        const int y2 = (y - windowRegion.top)  / scaleFactor;
+        if (tester->hitTest(QPoint(x2, y2))) {
+            return HTCAPTION;
+        }
+    }
 
-bool NativeWindowHelperPrivate::isMaximized() const
-{
-    Q_CHECK_PTR(window);
-
-    HWND hWnd = reinterpret_cast<HWND>(window->winId());
-    if (NULL == hWnd)
-        return false;
-
-    WINDOWPLACEMENT windowPlacement;
-    if (!GetWindowPlacement(hWnd, &windowPlacement))
-        return false;
-
-    return (SW_MAXIMIZE == windowPlacement.showCmd);
+    return HTCLIENT;
 }
 
 QMargins NativeWindowHelperPrivate::draggableMargins() const
@@ -329,15 +320,16 @@ QMargins NativeWindowHelperPrivate::maximizedMargins() const
 
 QRect NativeWindowHelperPrivate::availableGeometry() const
 {
-    MONITORINFO mi{0};
-    mi.cbSize = sizeof(MONITORINFO);
+    Q_CHECK_PTR(window);
 
-    auto hWnd = reinterpret_cast<HWND>(window->winId());
-    auto hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-    if (!hMonitor || !GetMonitorInfoW(hMonitor, &mi)) {
+    MONITORINFO monitorInfo = {0};
+    monitorInfo.cbSize = sizeof(MONITORINFO);
+    HWND hWnd = reinterpret_cast<HWND>(window->winId());
+    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    if (!hMonitor || !GetMonitorInfoW(hMonitor, &monitorInfo)) {
         Q_ASSERT(NULL != hMonitor);
         return window->screen()->availableGeometry();
     }
 
-    return QRect(mi.rcWork.left, mi.rcWork.top, mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top);
+    return QRect(monitorInfo.rcWork.left, monitorInfo.rcWork.top, monitorInfo.rcWork.right - monitorInfo.rcWork.left, monitorInfo.rcWork.bottom - monitorInfo.rcWork.top);
 }

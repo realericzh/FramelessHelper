@@ -21,7 +21,6 @@ Button {
     property bool changeColor: true
     property bool active: changeColor ? Window.active : true
 
-
     contentItem: Item {
         Image {
             id: img
@@ -39,15 +38,37 @@ Button {
             source: img
             cached: true
             color: (control.down || control.hovered) ? control.colorHoverd:
-                       (control.active? control.color: control.colorInactive)
+                                                       (control.active? control.color: control.colorInactive)
         }
     }
 
-    background: Rectangle {
+    background: Item {
         visible: control.down || control.hovered
-        color: control.down ? control.bgcolorPressed : (control.hovered ? control.bgcolorHoverd : control.bgcolor)
-    }
 
+        Rectangle {
+            id: radiusRect
+            width: 4
+            height: 4
+            radius: 2
+            x: parent.width - 4
+
+            color: control.down ? control.bgcolorPressed : (control.hovered ? control.bgcolorHoverd : control.bgcolor)
+        }
+
+        Rectangle {
+            width: parent.width - radiusRect.width / 2
+            height: parent.height
+            color: radiusRect.color
+        }
+
+        Rectangle {
+            width: radiusRect.width / 2
+            height: parent.height - radiusRect.height / 2
+            x: parent.width - radiusRect.width / 2
+            y: radiusRect.height / 2
+            color: radiusRect.color
+        }
+    }
 
     ToolTip.visible: hovered && !down
     ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval

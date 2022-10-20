@@ -16,20 +16,16 @@ protected:
 public:
     void updateWindowStyle();
     int hitTest(int x, int y) const;
-    bool isMaximized() const;
-
-public:
     QMargins draggableMargins() const;
     QMargins maximizedMargins() const;
+    QRect availableGeometry() const;
+
 public:
     QWindow            *window;
     NativeWindowTester *tester;
-public:
+
     HWND oldWindow;
 
-public:
-    QRect availableGeometry() const;
-public:
     qreal scaleFactor;
 };
 

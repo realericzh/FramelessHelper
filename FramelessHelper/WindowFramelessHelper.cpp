@@ -326,10 +326,10 @@ bool WindowFramelessHelperPrivate::hitTest(const QPoint &pos) const
         child = items[currentIndex];
         --currentIndex;
 
-        if (includeItems.contains(child)) {
-            break;
-        } else if (excludeItems.contains(child)) {
+        if (excludeItems.contains(child)) {
             return false;
+        } else if (includeItems.contains(child)) {
+            break;
         } else if (rootItem == child) {
             break;
         }

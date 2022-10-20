@@ -2,6 +2,7 @@ import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtShark.Window 1.0
 import QtQuick.Controls 2.5
+import QtGraphicalEffects 1.12
 
 Window {
     id: window
@@ -12,28 +13,51 @@ Window {
 
     flags: Qt.Window | Qt.FramelessWindowHint
 
+    color: "transparent"
+
     FramelessHelper {
         id: framelessHelper
 
         titleBarHeight: 60
 
         Component.onCompleted: {
-            addIncludeItem(titleBar)
+            addExcludeItem(background)
+            addExcludeItem(backgroundMask)
+            addExcludeItem(backgroundOpacity)
             addExcludeItem(controls)
+            addIncludeItem(titleBar)
         }
     }
 
     Image {
+        id: background
         anchors.fill: parent
+        anchors.margins: 1
         source: "qrc:/res/background.png"
+        visible: false
     }
 
+    Rectangle {
+        id: backgroundMask
+        anchors.fill: parent
+        anchors.margins: 1
+        color: "#ffffff"
+        visible: false
+    }
+
+    OpacityMask {
+        id: backgroundOpacity
+        anchors.fill: background
+        source: background
+        maskSource: backgroundMask
+    }
 
     Text {
         id: txt
-        anchors.horizontalCenter: parent.horizontalCenter
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors {
+            centerIn: parent
+        }
 
         text: "Qt Quick Inside"
         font {
@@ -46,51 +70,51 @@ Window {
 
     Row {
         id: colorPicker
+        anchors {
+            top: txt.bottom
+            topMargin: 20
+        }
+
         width: parent.width
-        anchors.top: txt.bottom
-        anchors.topMargin: 20
+
         Slider {
             id: sr
             from: 0
             to: 1
             value: 0
-            width: (parent.width - 20)/3
+            width: (parent.width - 20) / 3
         }
         Slider {
             id: sg
             from: 0
             to: 1
             value: 0
-            width: (parent.width - 20)/3
-
+            width: (parent.width - 20) / 3
         }
         Slider {
             id: sb
             from: 0
             to: 1
             value: 0
-            width: (parent.width - 20)/3
-
+            width: (parent.width - 20) / 3
         }
-
     }
-
 
     CustomTitleBar {
         id: titleBar
     }
 
     WindowBorder {
-        foregroundColor: Qt.rgba(sr.value,sg.value,sb.value,1)
+        // foregroundColor: Qt.rgba(sr.value, sg.value, sb.value, 1)
     }
 
     ThreeButtons {
         id: controls
         helper: framelessHelper
-        color: Qt.rgba(sr.value,sg.value,sb.value,1)
+        color: Qt.rgba(sr.value, sg.value, sb.value, 1)
     }
 
     Component.onCompleted: {
-        window.x = Screen.width / 2 - 410;
+        window.x = (Screen.width / 2) - 410;
     }
 }

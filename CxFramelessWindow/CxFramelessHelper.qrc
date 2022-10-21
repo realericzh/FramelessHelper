@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/CxFramelessWindow">
+        <file>Extras/res/close-button-black.png</file>
+        <file>Extras/res/close-button-white.png</file>
+        <file>Extras/res/maximize-button1-black.png</file>
+        <file>Extras/res/maximize-button1-white.png</file>
+        <file>Extras/res/maximize-button2-black.png</file>
+        <file>Extras/res/maximize-button2-white.png</file>
+        <file>Extras/res/minimize-button-black.png</file>
+        <file>Extras/res/minimize-button-white.png</file>
+    </qresource>
+</RCC>

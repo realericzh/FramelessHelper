@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/CxQuickFramelessWindow">
+        <file>Extras/qml/CxCloseButton.qml</file>
+        <file>Extras/qml/CxMaximizeButton.qml</file>
+        <file>Extras/qml/CxMinimizeButton.qml</file>
+        <file>Extras/res/close-button.svg</file>
+        <file>Extras/res/maximize-button1.svg</file>
+        <file>Extras/res/maximize-button2.svg</file>
+        <file>Extras/res/minimize-button.svg</file>
+    </qresource>
+</RCC>

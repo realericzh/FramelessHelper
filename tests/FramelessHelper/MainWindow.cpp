@@ -5,6 +5,7 @@
 #include <QWindow>
 #include <QScreen>
 #include <QPainter>
+#include <QPainterPath>
 
 #include "CxFramelessHelper.h"
 

@@ -7,5 +7,8 @@
         <file>Extras/res/maximize-button1.svg</file>
         <file>Extras/res/maximize-button2.svg</file>
         <file>Extras/res/minimize-button.svg</file>
+        <file>Extras/qml/CxCloseButton6.qml</file>
+        <file>Extras/qml/CxMaximizeButton6.qml</file>
+        <file>Extras/qml/CxMinimizeButton6.qml</file>
     </qresource>
 </RCC>

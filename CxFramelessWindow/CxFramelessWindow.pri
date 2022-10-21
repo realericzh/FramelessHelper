@@ -1,7 +1,3 @@
-QT += winextras
-
-LIBS += -lUser32 -lUxTheme
-
 INCLUDEPATH += $$PWD
 
 contains(QT, widgets) {
@@ -44,3 +40,5 @@ HEADERS += \
 SOURCES += \
     $$PWD/Windows/CxNativeWindowFilter.cpp \
     $$PWD/Windows/CxNativeWindowHelper.cpp
+
+LIBS += -lUser32 -lUxTheme -lDwmapi

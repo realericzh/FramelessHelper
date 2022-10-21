@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 
 AbstractButton {
     id: control
@@ -41,8 +41,7 @@ AbstractButton {
     }
 
     background: Rectangle {
-        visible: control.down || control.hovered
-        color: control.down ? "#8c0a15" : "#e81123"
+        color: control.down ? "#8c0a15" : control.hovered ? "#e81123" : "transparent"
     }
 
     ToolTip.visible: control.hovered && !control.down

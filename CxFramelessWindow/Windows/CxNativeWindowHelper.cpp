@@ -5,10 +5,10 @@
 #include <windowsx.h>
 #include <winuser.h>
 #include <Uxtheme.h>
+#include <dwmapi.h>
 
 #include <QScreen>
 #include <QEvent>
-#include <QtWin>
 #include <QOperatingSystemVersion>
 
 #include "CxNativeWindowFilter.h"
@@ -67,7 +67,7 @@ CxNativeWindowHelper::~CxNativeWindowHelper()
 {
 }
 
-bool CxNativeWindowHelper::nativeEventFilter(void *msg, long *result)
+bool CxNativeWindowHelper::nativeEventFilter(void *msg, Result *result)
 {
     Q_D(CxNativeWindowHelper);
 
@@ -221,8 +221,11 @@ void CxNativeWindowHelperPrivate::updateWindowStyle()
             | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     LONG newStyle = WS_POPUP            | WS_THICKFRAME;
 
-    if (QtWin::isCompositionEnabled())
+    BOOL compositionEnabled = FALSE;
+    DwmIsCompositionEnabled(&compositionEnabled);
+    if (compositionEnabled) {
         newStyle |= WS_CAPTION;
+    }
 
     if (window->flags() & Qt::CustomizeWindowHint) {
         if (window->flags() & Qt::WindowSystemMenuHint)
@@ -248,8 +251,10 @@ void CxNativeWindowHelperPrivate::updateWindowStyle()
                  SWP_NOOWNERZORDER | SWP_NOZORDER |
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 
-    if (QtWin::isCompositionEnabled())
-        QtWin::extendFrameIntoClientArea(window, 1, 1, 1, 1);
+    if (compositionEnabled) {
+        const MARGINS margins{1, 1, 1, 1};
+        DwmExtendFrameIntoClientArea(hWnd, &margins);
+    }
 }
 
 int CxNativeWindowHelperPrivate::hitTest(int x, int y) const

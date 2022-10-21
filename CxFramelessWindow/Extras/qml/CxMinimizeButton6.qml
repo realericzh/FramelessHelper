@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtGraphicalEffects 1.12
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import Qt5Compat.GraphicalEffects
 
 AbstractButton {
     id: control
@@ -24,7 +24,7 @@ AbstractButton {
             visible: false
 
             fillMode: Image.PreserveAspectFit
-            source: "qrc:/CxQuickFramelessWindow/Extras/res/close-button.svg"
+            source: "qrc:/CxQuickFramelessWindow/Extras/res/minimize-button.svg"
         }
 
         ColorOverlay {
@@ -35,19 +35,18 @@ AbstractButton {
 
             source: icon
             cached: true
-            color: control.dark ? "#ffffff" : (control.down || control.hovered) ? "#ffffff" : "#000000"
+            color: control.dark ? "#ffffff" : "#000000"
             opacity: Window.active ? 1.0 : 0.5
         }
     }
 
     background: Rectangle {
         visible: control.down || control.hovered
-        color: control.down ? "#8c0a15" : "#e81123"
+        color: control.dark ? "#ffffff" : "#000000"
+        opacity: control.down ? 0.2 : control.hovered ? 0.1 : 0.0
     }
 
-    ToolTip.visible: control.hovered && !control.down
+    ToolTip.visible: hovered && !down
     ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
-    ToolTip.text: qsTr("Close")
+    ToolTip.text: qsTr("Minimize")
 }
-
-

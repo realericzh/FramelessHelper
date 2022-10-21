@@ -9,8 +9,7 @@
 
 // class CxNativeWindowFilter
 
-bool CxNativeWindowFilter::nativeEventFilter(const QByteArray &eventType,
-                                             void *message, long *result)
+bool CxNativeWindowFilter::nativeEventFilter(const QByteArray &eventType, void *message, Result *result)
 {
     Q_UNUSED(eventType);
 

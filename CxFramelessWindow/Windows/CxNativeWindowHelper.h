@@ -27,8 +27,14 @@ public:
     explicit CxNativeWindowHelper(QWindow *window);
     ~CxNativeWindowHelper();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    typedef long    Result;
+#else
+    typedef qintptr Result;
+#endif
+
 public:
-    bool nativeEventFilter(void *msg, long *result);
+    bool nativeEventFilter(void *msg, Result *result);
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:

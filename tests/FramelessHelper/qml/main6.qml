@@ -3,7 +3,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 
-import QtShark.Window
+import CxQuick.Window
 
 Window {
     id: window
@@ -95,6 +95,8 @@ Window {
 
             CxCloseButton {
                 onClicked: { framelessHelper.triggerCloseButtonAction() }
+
+                radius: 3
             }
 
             Component.onCompleted: {

@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QEvent>
 #include <QTimer>
+#include <QPainterPath>
 
 // class CxCloseButton
 
@@ -53,6 +54,23 @@ bool CxCloseButton::isDark() const
     return d_func()->dark;
 }
 
+void CxCloseButton::setRadius(qreal radius)
+{
+    Q_D(CxCloseButton);
+
+    if (radius != d->radius) {
+        d->radius = radius;
+        emit radiusChanged(radius);
+
+        update();
+    }
+}
+
+qreal CxCloseButton::radius() const
+{
+    return d_func()->radius;
+}
+
 bool CxCloseButton::eventFilter(QObject *obj, QEvent *ev)
 {
     if (ev->type() == QEvent::WindowStateChange) {
@@ -77,6 +95,15 @@ void CxCloseButton::paintEvent(QPaintEvent *)
     bool actived = false;
     if (d->window) {
         actived = d->window->isActiveWindow();
+    }
+
+    if (d->radius > 0) {
+        QPainterPath pp;
+        pp.setFillRule(Qt::WindingFill);
+        pp.addRect(0, 0, rc.width() - d->radius, rc.height());
+        pp.addRect(rc.width() - d->radius, d->radius, d->radius, rc.height() - d->radius);
+        pp.addEllipse(rc.width() - d->radius * 2, 0, d->radius * 2, d->radius * 2);
+        painter.setClipPath(pp);
     }
 
     if (isDown()) {

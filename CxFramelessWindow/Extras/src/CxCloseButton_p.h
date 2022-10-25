@@ -20,6 +20,7 @@ protected:
     QPixmap whiteIcon;
 
     bool dark = false;
+    qreal radius = 0.0;
 };
 
 #endif // CXCLOSEBUTTON_P_H

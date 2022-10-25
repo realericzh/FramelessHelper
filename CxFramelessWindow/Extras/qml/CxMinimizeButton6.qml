@@ -45,8 +45,4 @@ AbstractButton {
         color: control.dark ? "#ffffff" : "#000000"
         opacity: control.down ? 0.2 : control.hovered ? 0.1 : 0.0
     }
-
-    ToolTip.visible: hovered && !down
-    ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
-    ToolTip.text: qsTr("Minimize")
 }

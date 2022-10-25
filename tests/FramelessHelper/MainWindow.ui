@@ -42,9 +42,6 @@
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
      </property>
-     <property name="toolTip">
-      <string>Close</string>
-     </property>
     </widget>
    </item>
    <item row="0" column="0">
@@ -68,9 +65,6 @@
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
      </property>
-     <property name="toolTip">
-      <string>Minimize</string>
-     </property>
     </widget>
    </item>
    <item row="0" column="2">
@@ -80,9 +74,6 @@
      </property>
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
-     </property>
-     <property name="toolTip">
-      <string>Maximize</string>
      </property>
     </widget>
    </item>

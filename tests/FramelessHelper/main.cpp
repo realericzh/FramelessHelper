@@ -11,16 +11,16 @@ int main(int argc, char *argv[])
 #endif
     QApplication app(argc, argv);
 
-    qmlRegisterType<CxQuickFramelessHelper>("QtShark.Window", 1, 0, "CxFramelessHelper");
+    qmlRegisterType<CxQuickFramelessHelper>("CxQuick.Window", 1, 0, "CxFramelessHelper");
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxCloseButton.qml"), "QtShark.Window", 1, 0, "CxCloseButton");
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMaximizeButton.qml"), "QtShark.Window", 1, 0, "CxMaximizeButton");
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMinimizeButton.qml"), "QtShark.Window", 1, 0, "CxMinimizeButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxCloseButton.qml"), "CxQuick.Window", 1, 0, "CxCloseButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMaximizeButton.qml"), "CxQuick.Window", 1, 0, "CxMaximizeButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMinimizeButton.qml"), "CxQuick.Window", 1, 0, "CxMinimizeButton");
 #else
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxCloseButton6.qml"), "QtShark.Window", 1, 0, "CxCloseButton");
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMaximizeButton6.qml"), "QtShark.Window", 1, 0, "CxMaximizeButton");
-    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMinimizeButton6.qml"), "QtShark.Window", 1, 0, "CxMinimizeButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxCloseButton6.qml"), "CxQuick.Window", 1, 0, "CxCloseButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMaximizeButton6.qml"), "CxQuick.Window", 1, 0, "CxMaximizeButton");
+    qmlRegisterType(QUrl("qrc:/CxQuickFramelessWindow/Extras/qml/CxMinimizeButton6.qml"), "CxQuick.Window", 1, 0, "CxMinimizeButton");
 #endif
 
     QQmlApplicationEngine engine;

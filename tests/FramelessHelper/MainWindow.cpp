@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     helper->addExcludeItem(ui->maximizeButton);
     helper->addExcludeItem(ui->closeButton);
 
+    ui->closeButton->setRadius(3);
+
     connect(ui->minimizeButton, &QPushButton::clicked,
             helper, &CxFramelessHelper::triggerMinimizeButtonAction);
     connect(ui->maximizeButton, &QPushButton::clicked,

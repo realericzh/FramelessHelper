@@ -10,6 +10,7 @@ class CxCloseButton : public QPushButton
     Q_DECLARE_PRIVATE(CxCloseButton)
 
     Q_PROPERTY(bool dark READ isDark WRITE setDark NOTIFY darkChanged)
+    Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged)
 
 public:
     explicit CxCloseButton(QWidget *parent = nullptr);
@@ -23,6 +24,13 @@ public:
     void setDark(bool dark);
 public:
     bool isDark() const;
+
+signals:
+    void radiusChanged(qreal radius);
+public:
+    void setRadius(qreal radius);
+public:
+    qreal radius() const;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;

@@ -10,6 +10,7 @@ AbstractButton {
     height: 26
 
     property bool dark: false
+    property real radius: 0.0
 
     contentItem: Item {
         Image {
@@ -40,13 +41,48 @@ AbstractButton {
         }
     }
 
-    background: Rectangle {
-        color: control.down ? "#8c0a15" : control.hovered ? "#e81123" : "transparent"
-    }
+    background: Item {
+        visible: control.down || control.hovered
 
-    ToolTip.visible: control.hovered && !control.down
-    ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
-    ToolTip.text: qsTr("Close")
+        Item {
+            id: backgroundItem
+            anchors {
+                fill: parent
+            }
+            visible: false
+
+            Rectangle {
+                width: backgroundItem.width - control.radius
+                height: backgroundItem.height
+                color: "#ff0000"
+            }
+
+            Rectangle {
+                x: backgroundItem.width - control.radius
+                y: control.radius
+                width: control.radius
+                height: backgroundItem.height - control.radius
+                color: "#ff0000"
+            }
+
+            Rectangle {
+                x: backgroundItem.width - control.radius * 2
+                width: control.radius * 2
+                height: width
+                radius: control.radius
+                color: "#ff0000"
+            }
+        }
+
+        ColorOverlay {
+            anchors {
+                fill: parent
+            }
+
+            source: backgroundItem
+            color: control.down ? "#8c0a15" : "#e81123"
+        }
+    }
 }
 
 
